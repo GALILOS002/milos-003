@@ -1,0 +1,539 @@
+from pathlib import Path
+import zipfile, shutil
+
+root = Path("/mnt/data/Milos_Birthday_V3")
+if root.exists():
+    shutil.rmtree(root)
+root.mkdir()
+
+html = r'''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#090512">
+<title>Milos' Birthday Runner 🎂</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#08040f;color:#fff}
+body{overflow-x:hidden}
+button{font:inherit}
+.hidden{display:none!important}
+.screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.panel{width:min(940px,94vw);padding:32px;border:1px solid #ffffff18;border-radius:30px;background:#ffffff08;backdrop-filter:blur(16px);box-shadow:0 30px 100px #0008}
+.center{text-align:center}
+.eyebrow{font-size:11px;font-weight:1000;letter-spacing:3px;color:#ff9dc6;text-transform:uppercase}
+h1{font-size:clamp(44px,9vw,82px);line-height:.9;margin:16px 0;background:linear-gradient(90deg,#fff,#ff72b3,#b6a1ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:clamp(30px,6vw,48px);margin:10px 0}
+p{line-height:1.7;color:#ddd}
+button{border:0;border-radius:999px;padding:14px 24px;color:#fff;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#ff5fa2,#947cff);box-shadow:0 12px 35px #ff5fa233}
+button.secondary{background:#ffffff12;box-shadow:none}
+.hero{font-size:88px;animation:float 2.8s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-12px)}}
+#space{position:fixed;inset:0;z-index:-2;background:
+radial-gradient(circle at 20% 15%,#42185b 0,transparent 30%),
+radial-gradient(circle at 80% 75%,#22205b 0,transparent 32%),#08040f}
+#stars{position:fixed;inset:0;z-index:-1;pointer-events:none}
+.star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;animation:twinkle 2s infinite alternate}
+@keyframes twinkle{to{opacity:.12;transform:scale(.5)}}
+.rules{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:25px 0}
+.rule{padding:14px 8px;border:1px solid #ffffff12;background:#ffffff08;border-radius:17px}
+.rule b{display:block;font-size:20px}.rule span{font-size:12px;color:#aaa}
+#gameWrap{width:min(900px,96vw)}
+.gameTop{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-weight:900}
+.stat{padding:9px 12px;border-radius:12px;background:#ffffff0d;border:1px solid #ffffff10}
+#game{position:relative;width:100%;aspect-ratio:16/9;min-height:330px;overflow:hidden;border-radius:24px;border:2px solid #ffffff15;background:#10071b;box-shadow:0 25px 80px #0009}
+canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+.gameMessage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;pointer-events:none}
+.gameMessage .bubble{padding:18px 25px;border-radius:20px;background:#090512dd;border:1px solid #ffffff18;box-shadow:0 20px 50px #0008}
+.controls{display:flex;justify-content:center;gap:15px;margin-top:14px}
+.control{width:76px;height:54px;border-radius:16px;background:#ffffff12;border:1px solid #ffffff15;box-shadow:none;font-size:22px;touch-action:none}
+.hint{text-align:center;color:#999;font-size:12px;margin:10px 0}
+.finalCard{padding:26px;border-radius:23px;background:#0003;border:1px solid #ffffff10;text-align:left;line-height:1.9;font-size:18px;white-space:pre-line}
+.gift{margin-top:22px;padding:28px;border-radius:25px;background:radial-gradient(circle at 50% 15%,#5c1744,#120815 68%);border:1px solid #ff78b522}
+.giftIcon{font-size:90px;cursor:pointer;animation:pulse 1.7s infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.reward{font-size:25px;font-weight:1000;color:#ff9dc6}
+@media(max-width:650px){
+.panel{padding:22px}
+.rules{grid-template-columns:repeat(2,1fr)}
+#game{min-height:270px}
+}
+</style>
+</head>
+<body>
+<div id="space"></div><div id="stars"></div>
+
+<section id="intro" class="screen">
+<div class="panel center">
+<div class="hero">🎂</div>
+<div class="eyebrow">CLASSIFIED BIRTHDAY FILE</div>
+<h1>MILOS'<br>BIRTHDAY RUNNER</h1>
+<p><strong>PLAYER:</strong> MILOS</p>
+<p><strong>AGE UNLOCKED:</strong> 20 🎂</p>
+<p>Your mission is simple:</p>
+<p><strong>Collect 20 birthday stars.</strong><br>Survive the obstacles.<br>Defeat the birthday villain.</p>
+<div class="rules">
+<div class="rule">⭐<b>+1</b><span>STAR</span></div>
+<div class="rule">🎂<b>+3</b><span>CAKE</span></div>
+<div class="rule">🎁<b>+5</b><span>PRESENT</span></div>
+<div class="rule">🧸<b>+10</b><span>TRIXX</span></div>
+</div>
+<p>⚠️ <strong>WARNING:</strong> Blue has been detected.</p>
+<p>🧸 Trixx has been deployed.</p>
+<br>
+<button onclick="startGame()">PRESS START ❤️</button>
+<p class="hint">Desktop: Space / ↑ to jump • Mobile: tap JUMP</p>
+</div>
+</section>
+
+<section id="gameScreen" class="screen hidden">
+<div id="gameWrap">
+<div class="gameTop">
+<div class="stat">⭐ <span id="starsScore">0</span> / 20</div>
+<div class="stat">🎁 SCORE <span id="score">0</span></div>
+<div class="stat">❤️ <span id="lives">3</span></div>
+<div class="stat">🏆 BEST <span id="best">0</span></div>
+</div>
+<div id="game">
+<canvas id="canvas" width="960" height="540"></canvas>
+<div id="gameMessage" class="gameMessage hidden">
+<div class="bubble" id="gameMessageText"></div>
+</div>
+</div>
+<div class="controls">
+<button class="control" id="jumpBtn" aria-label="Jump">⬆️</button>
+<button class="control" id="pauseBtn" aria-label="Pause">Ⅱ</button>
+</div>
+<div class="hint">Collect ⭐ 🎂 🎁 and TRIXX 🧸 • Avoid 💀 and BLUE • Reach 20 stars!</div>
+</div>
+</section>
+
+<section id="gameOver" class="screen hidden">
+<div class="panel center">
+<div style="font-size:70px">💀</div>
+<div class="eyebrow">MISSION FAILED</div>
+<h2>Blue got you.</h2>
+<p>But Milos' birthday quest is not over.</p>
+<p>Final stars: <strong id="overStars">0</strong> / 20</p>
+<p>Final score: <strong id="overScore">0</strong></p>
+<br>
+<button onclick="startGame()">TRY AGAIN 🔥</button>
+</div>
+</section>
+
+<section id="win" class="screen hidden">
+<div class="panel center">
+<div class="hero">🎉</div>
+<div class="eyebrow">MISSION COMPLETE • AGE 20 UNLOCKED</div>
+<h1>HAPPY BIRTHDAY, MILOS ❤️</h1>
+<p><strong>20 / 20 STARS COLLECTED.</strong></p>
+<p>Blue: defeated.</p>
+<p>Trixx: safe.</p>
+<p>Birthday: successfully hacked.</p>
+<div class="finalCard">
+Hey Milos,
+
+Happy 20th birthday. ❤️
+
+I wanted to give you something that wasn't just another message on a screen.
+
+I wanted to make you a tiny universe that you could actually play through.
+
+I wish I could be there beside you today.
+I wish I could steal some of your birthday cake, annoy you in person, and give you the hug that a screen absolutely cannot replace.
+
+So until I can do that, here's a little piece of me.
+
+Thank you for being you.
+Thank you for all the little moments that became part of our story.
+And thank you for making the distance feel a little less impossible.
+
+Today is your day.
+
+So go be 20.
+Make memories.
+Eat cake.
+And remember that somewhere in Tunisia, someone is very happy that you exist.
+
+Happy birthday, Milos.
+
+I love you. ❤️
+
+— Rami
+</div>
+
+<div class="gift">
+<div class="eyebrow">FINAL BIRTHDAY FILE</div>
+<h2>One last unlock...</h2>
+<div id="giftClosed">
+<div class="giftIcon" onclick="openGift()">🎁</div>
+<p>Tap the present.</p>
+</div>
+<div id="giftOpen" class="hidden">
+<div style="font-size:70px">💋</div>
+<div class="reward">REWARD UNLOCKED</div>
+<p>🎟️ One enormous real-life hug</p>
+<p>💋 Unlimited kisses</p>
+<p>🫂 All the cuddles waiting for you</p>
+<p><strong>Redeem when the distance finally loses.</strong></p>
+</div>
+</div>
+<br>
+<button class="secondary" onclick="location.reload()">Play Again ↻</button>
+</div>
+</section>
+
+<script>
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+ctx.imageSmoothingEnabled=false;
+
+const W=960,H=540;
+const ground=430;
+
+let running=false,paused=false,gameOver=false;
+let last=0,elapsed=0,score=0,starCount=0,lives=3;
+let speed=330,spawnTimer=0,invincible=0;
+let objects=[],particles=[];
+let best=Number(localStorage.getItem("milosBirthdayBest")||0);
+
+document.getElementById("best").textContent=best;
+
+const player={
+ x:145,y:360,w:42,h:58,vy:0,onGround:true
+};
+
+const keys={};
+
+function section(id){
+ document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));
+ document.getElementById(id).classList.remove("hidden");
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function startGame(){
+ section("gameScreen");
+ running=true;paused=false;gameOver=false;
+ last=performance.now();elapsed=0;score=0;starCount=0;lives=3;
+ speed=330;spawnTimer=.5;invincible=0;objects=[];particles=[];
+ player.y=ground-player.h;player.vy=0;player.onGround=true;
+ updateUI();
+ showMessage("GO, MILOS!<br><small>Collect 20 stars. 🎂</small>",1000);
+ requestAnimationFrame(loop);
+}
+
+function jump(){
+ if(!running||paused||gameOver)return;
+ if(player.onGround){
+  player.vy=-760;
+  player.onGround=false;
+ }
+}
+
+document.addEventListener("keydown",e=>{
+ keys[e.code]=true;
+ if(e.code==="Space"||e.code==="ArrowUp"){
+  e.preventDefault();
+  jump();
+ }
+ if(e.code==="KeyP") togglePause();
+});
+document.addEventListener("keyup",e=>keys[e.code]=false);
+
+const jumpBtn=document.getElementById("jumpBtn");
+jumpBtn.addEventListener("pointerdown",e=>{e.preventDefault();jump()});
+document.getElementById("pauseBtn").addEventListener("pointerdown",e=>{e.preventDefault();togglePause()});
+canvas.addEventListener("pointerdown",()=>jump());
+
+function togglePause(){
+ if(!running||gameOver)return;
+ paused=!paused;
+ if(!paused){
+  last=performance.now();
+  requestAnimationFrame(loop);
+  hideMessage();
+ }else{
+  showMessage("PAUSED<br><small>Tap Ⅱ to continue</small>",0);
+ }
+}
+
+function showMessage(html,ms){
+ const box=document.getElementById("gameMessage");
+ document.getElementById("gameMessageText").innerHTML=html;
+ box.classList.remove("hidden");
+ if(ms) setTimeout(()=>{if(!paused)hideMessage()},ms);
+}
+function hideMessage(){document.getElementById("gameMessage").classList.add("hidden")}
+
+function updateUI(){
+ document.getElementById("starsScore").textContent=starCount;
+ document.getElementById("score").textContent=Math.floor(score);
+ document.getElementById("lives").textContent=lives;
+ document.getElementById("best").textContent=best;
+}
+
+function spawn(){
+ const r=Math.random();
+ let type;
+ if(r<.43)type="star";
+ else if(r<.58)type="cake";
+ else if(r<.70)type="gift";
+ else if(r<.78)type="trixx";
+ else if(r<.90)type="rock";
+ else type="blue";
+
+ const data={
+  star:{emoji:"⭐",value:1,w:34,h:34},
+  cake:{emoji:"🎂",value:3,w:42,h:42},
+  gift:{emoji:"🎁",value:5,w:42,h:42},
+  trixx:{emoji:"🧸",value:10,w:45,h:45},
+  rock:{emoji:"💀",value:0,w:45,h:50},
+  blue:{emoji:"💙",value:0,w:52,h:58}
+ }[type];
+
+ const y=type==="rock"||type==="blue"?ground-data.h:ground-110-Math.random()*80;
+
+ objects.push({
+  type,x:W+30,y,w:data.w,h:data.h,
+  emoji:data.emoji,value:data.value,
+  bob:Math.random()*Math.PI*2,
+  passed:false
+ });
+}
+
+function rectHit(a,b){
+ const pad=8;
+ return a.x+pad<b.x+b.w-pad &&
+        a.x+a.w-pad>b.x+pad &&
+        a.y+pad<b.y+b.h-pad &&
+        a.y+a.h-pad>b.y+pad;
+}
+
+function collect(o){
+ score+=o.value*10;
+ if(o.type==="star"){
+  starCount++;
+  burst(o.x+o.w/2,o.y+o.h/2,"⭐");
+  if(starCount===10)showMessage("10 STARS!<br><small>Halfway, birthday boy. 🔥</small>",900);
+  if(starCount>=20){
+   winGame();
+   return;
+  }
+ }
+ if(o.type==="trixx"){
+  invincible=3;
+  showMessage("🧸 TRIXX POWER!<br><small>Invincible for 3 seconds!</small>",900);
+  burst(o.x+o.w/2,o.y+o.h/2,"❤️");
+ }
+ burst(o.x+o.w/2,o.y+o.h/2,o.emoji);
+}
+
+function hurt(o){
+ if(invincible>0)return;
+ lives--;
+ invincible=1.2;
+ burst(player.x+player.w/2,player.y+player.h/2,"💥");
+ if(o.type==="blue")showMessage("💙 BLUE ATTACKED!<br><small>Trixx is not impressed.</small>",800);
+ if(lives<=0){
+  endGame();
+ }
+}
+
+function endGame(){
+ running=false;gameOver=true;
+ document.getElementById("overStars").textContent=starCount;
+ document.getElementById("overScore").textContent=Math.floor(score);
+ section("gameOver");
+}
+
+function winGame(){
+ running=false;gameOver=false;
+ best=Math.max(best,Math.floor(score));
+ localStorage.setItem("milosBirthdayBest",best);
+ burst(W/2,H/2,"🎉");
+ section("win");
+ confetti();
+}
+
+function loop(now){
+ if(!running||gameOver)return;
+ if(paused)return;
+ const dt=Math.min(.033,(now-last)/1000);
+ last=now;
+ elapsed+=dt;
+ update(dt);
+ draw();
+ if(running)requestAnimationFrame(loop);
+}
+
+function update(dt){
+ speed=330+Math.min(180,elapsed*7);
+ spawnTimer-=dt;
+ if(spawnTimer<=0){
+  spawn();
+  spawnTimer=.65+Math.random()*.65-Math.min(.25,elapsed*.005);
+ }
+
+ player.vy+=1850*dt;
+ player.y+=player.vy*dt;
+ if(player.y+player.h>=ground){
+  player.y=ground-player.h;
+  player.vy=0;
+  player.onGround=true;
+ }else player.onGround=false;
+
+ invincible=Math.max(0,invincible-dt);
+
+ objects.forEach(o=>{
+  o.x-=speed*dt;
+  o.bob+=dt*5;
+  if(rectHit(player,o)){
+   if(["star","cake","gift","trixx"].includes(o.type))collect(o);
+   else hurt(o);
+   o.x=-200;
+  }
+ });
+
+ objects=objects.filter(o=>o.x>-100);
+
+ particles.forEach(p=>{
+  p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=500*dt;p.life-=dt;
+ });
+ particles=particles.filter(p=>p.life>0);
+
+ score+=dt*2;
+ updateUI();
+}
+
+function draw(){
+ ctx.clearRect(0,0,W,H);
+
+ // sky
+ const grad=ctx.createLinearGradient(0,0,0,H);
+ grad.addColorStop(0,"#120a2b");
+ grad.addColorStop(1,"#08050e");
+ ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+
+ // moon
+ ctx.fillStyle="#fff1b8";
+ ctx.beginPath();ctx.arc(780,90,43,0,Math.PI*2);ctx.fill();
+
+ // stars
+ for(let i=0;i<65;i++){
+  const x=(i*157+elapsed*18)%W;
+  const y=(i*73)%300;
+  ctx.fillStyle=i%7===0?"#ff9bc4":"#fff";
+  ctx.globalAlpha=.55+(i%5)/10;
+  ctx.fillRect(x,y,2+(i%2),2+(i%2));
+ }
+ ctx.globalAlpha=1;
+
+ // distant skyline
+ ctx.fillStyle="#0e0920";
+ for(let x=0;x<W;x+=55){
+  const bh=40+(x*17%90);
+  ctx.fillRect(x,ground-bh,45,bh);
+ }
+
+ // ground
+ ctx.fillStyle="#1d1230";ctx.fillRect(0,ground,W,H-ground);
+ ctx.fillStyle="#ff6fae";
+ for(let x=-(elapsed*speed)%80;x<W;x+=80)ctx.fillRect(x,ground,40,4);
+
+ // objects
+ objects.forEach(o=>{
+  ctx.font=(o.h*.9)+"px serif";
+  ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillText(o.emoji,o.x+o.w/2,o.y+o.h/2+Math.sin(o.bob)*4);
+ });
+
+ // player pixel-style
+ const flash=invincible>0 && Math.floor(invincible*12)%2===0;
+ if(!flash){
+  ctx.fillStyle="#ff76b3";
+  ctx.fillRect(player.x+9,player.y+17,25,32);
+  ctx.fillStyle="#ffd7e7";
+  ctx.fillRect(player.x+6,player.y,31,27);
+  ctx.fillStyle="#24102b";
+  ctx.fillRect(player.x+12,player.y+9,4,5);
+  ctx.fillRect(player.x+27,player.y+9,4,5);
+  ctx.fillStyle="#9a79ff";
+  ctx.fillRect(player.x+4,player.y+48,13,10);
+  ctx.fillRect(player.x+27,player.y+48,13,10);
+  // birthday hat
+  ctx.fillStyle="#ffdf6e";
+  ctx.beginPath();ctx.moveTo(player.x+20,player.y-17);ctx.lineTo(player.x+7,player.y+2);ctx.lineTo(player.x+33,player.y+2);ctx.closePath();ctx.fill();
+  ctx.fillStyle="#fff";ctx.fillRect(player.x+18,player.y-21,5,5);
+ }
+
+ // particles
+ particles.forEach(p=>{
+  ctx.globalAlpha=Math.max(0,p.life/.9);
+  ctx.font="22px serif";ctx.fillText(p.text,p.x,p.y);
+ });
+ ctx.globalAlpha=1;
+}
+
+function burst(x,y,text){
+ for(let i=0;i<10;i++){
+  particles.push({
+   x,y,text,
+   vx:(Math.random()-.5)*220,
+   vy:-80-Math.random()*220,
+   life:.6+Math.random()*.4
+  });
+ }
+}
+
+function confetti(){
+ const emojis=["🎉","🎂","❤️","⭐","🎁","🧸","✨"];
+ for(let i=0;i<100;i++){
+  const e=document.createElement("span");
+  e.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+  e.style.position="fixed";
+  e.style.left=Math.random()*100+"vw";
+  e.style.top="-30px";
+  e.style.fontSize=(15+Math.random()*28)+"px";
+  e.style.zIndex=1000;
+  e.style.pointerEvents="none";
+  e.style.transition="transform 3s linear,opacity 3s";
+  document.body.appendChild(e);
+  setTimeout(()=>{
+   e.style.transform=`translateY(120vh) rotate(${Math.random()*1000-500}deg)`;
+   e.style.opacity="0";
+  },30);
+  setTimeout(()=>e.remove(),3100);
+ }
+}
+
+function openGift(){
+ document.getElementById("giftClosed").classList.add("hidden");
+ document.getElementById("giftOpen").classList.remove("hidden");
+ confetti();
+}
+
+for(let i=0;i<110;i++){
+ const s=document.createElement("i");
+ s.className="star";
+ s.style.left=Math.random()*100+"%";
+ s.style.top=Math.random()*100+"%";
+ const size=1+Math.random()*3;
+ s.style.width=size+"px";s.style.height=size+"px";
+ s.style.animationDelay=Math.random()*3+"s";
+ document.getElementById("stars").appendChild(s);
+}
+</script>
+</body>
+</html>
+'''
+
+index = root/"index.html"
+index.write_text(html,encoding="utf-8")
+
+zip_path=Path("/mnt/data/Milos_Birthday_V3.zip")
+with zipfile.ZipFile(zip_path,"w",zipfile.ZIP_DEFLATED) as z:
+    z.write(index,"index.html")
+
+print(f"Created clean V3 index.html: {index}")
+print(f"Created upload ZIP: {zip_path}")
