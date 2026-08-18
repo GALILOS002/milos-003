@@ -1,12 +1,4 @@
-from pathlib import Path
-import zipfile, shutil
-
-root = Path("/mnt/data/Milos_Birthday_V3")
-if root.exists():
-    shutil.rmtree(root)
-root.mkdir()
-
-html = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -16,7 +8,7 @@ html = r'''<!DOCTYPE html>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#08040f;color:#fff}
-body{overflow-x:hidden}
+body{overflow-x:hidden;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 button{font:inherit}
 .hidden{display:none!important}
 .screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
@@ -47,7 +39,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .gameMessage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;pointer-events:none}
 .gameMessage .bubble{padding:18px 25px;border-radius:20px;background:#090512dd;border:1px solid #ffffff18;box-shadow:0 20px 50px #0008}
 .controls{display:flex;justify-content:center;gap:15px;margin-top:14px}
-.control{width:76px;height:54px;border-radius:16px;background:#ffffff12;border:1px solid #ffffff15;box-shadow:none;font-size:22px;touch-action:none}
+.control{width:84px;height:64px;border-radius:16px;background:#ffffff12;border:1px solid #ffffff15;box-shadow:none;font-size:22px;touch-action:none}
 .hint{text-align:center;color:#999;font-size:12px;margin:10px 0}
 .finalCard{padding:26px;border-radius:23px;background:#0003;border:1px solid #ffffff10;text-align:left;line-height:1.9;font-size:18px;white-space:pre-line}
 .gift{margin-top:22px;padding:28px;border-radius:25px;background:radial-gradient(circle at 50% 15%,#5c1744,#120815 68%);border:1px solid #ff78b522}
@@ -57,7 +49,19 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 @media(max-width:650px){
 .panel{padding:22px}
 .rules{grid-template-columns:repeat(2,1fr)}
-#game{min-height:270px}
+#gameWrap{width:100%;max-width:100%}
+#game{min-height:0;aspect-ratio:4/3;border-radius:18px}
+.gameTop{font-size:13px;gap:5px}
+.stat{padding:7px 9px}
+.controls{gap:18px;margin-top:12px}
+.control{width:92px;height:64px;font-size:25px}
+.hint{font-size:11px}
+}
+@media(max-width:420px){
+.screen{padding:10px}
+.panel{padding:18px}
+#game{aspect-ratio:4/3}
+.control{width:96px;height:66px}
 }
 </style>
 </head>
@@ -102,7 +106,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 </div>
 </div>
 <div class="controls">
-<button class="control" id="jumpBtn" aria-label="Jump">⬆️</button>
+<button class="control" id="jumpBtn" aria-label="Jump">⬆️ JUMP</button>
 <button class="control" id="pauseBtn" aria-label="Pause">Ⅱ</button>
 </div>
 <div class="hint">Collect ⭐ 🎂 🎁 and TRIXX 🧸 • Avoid 💀 and BLUE • Reach 20 stars!</div>
@@ -194,7 +198,7 @@ const ground=430;
 
 let running=false,paused=false,gameOver=false;
 let last=0,elapsed=0,score=0,starCount=0,lives=3;
-let speed=330,spawnTimer=0,invincible=0;
+let speed=265,spawnTimer=0,invincible=0;
 let objects=[],particles=[];
 let best=Number(localStorage.getItem("milosBirthdayBest")||0);
 
@@ -216,7 +220,7 @@ function startGame(){
  section("gameScreen");
  running=true;paused=false;gameOver=false;
  last=performance.now();elapsed=0;score=0;starCount=0;lives=3;
- speed=330;spawnTimer=.5;invincible=0;objects=[];particles=[];
+ speed=265;spawnTimer=1.0;invincible=0;objects=[];particles=[];
  player.y=ground-player.h;player.vy=0;player.onGround=true;
  updateUI();
  showMessage("GO, MILOS!<br><small>Collect 20 stars. 🎂</small>",1000);
@@ -226,7 +230,7 @@ function startGame(){
 function jump(){
  if(!running||paused||gameOver)return;
  if(player.onGround){
-  player.vy=-760;
+  player.vy=-735;
   player.onGround=false;
  }
 }
@@ -244,7 +248,7 @@ document.addEventListener("keyup",e=>keys[e.code]=false);
 const jumpBtn=document.getElementById("jumpBtn");
 jumpBtn.addEventListener("pointerdown",e=>{e.preventDefault();jump()});
 document.getElementById("pauseBtn").addEventListener("pointerdown",e=>{e.preventDefault();togglePause()});
-canvas.addEventListener("pointerdown",()=>jump());
+canvas.addEventListener("pointerdown",e=>{e.preventDefault();jump();},{passive:false});
 
 function togglePause(){
  if(!running||gameOver)return;
@@ -375,7 +379,7 @@ function update(dt){
   spawnTimer=.65+Math.random()*.65-Math.min(.25,elapsed*.005);
  }
 
- player.vy+=1850*dt;
+ player.vy+=1680*dt;
  player.y+=player.vy*dt;
  if(player.y+player.h>=ground){
   player.y=ground-player.h;
@@ -526,14 +530,3 @@ for(let i=0;i<110;i++){
 </script>
 </body>
 </html>
-'''
-
-index = root/"index.html"
-index.write_text(html,encoding="utf-8")
-
-zip_path=Path("/mnt/data/Milos_Birthday_V3.zip")
-with zipfile.ZipFile(zip_path,"w",zipfile.ZIP_DEFLATED) as z:
-    z.write(index,"index.html")
-
-print(f"Created clean V3 index.html: {index}")
-print(f"Created upload ZIP: {zip_path}")
