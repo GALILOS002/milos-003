@@ -197,7 +197,7 @@ const W=960,H=540;
 const ground=430;
 
 let running=false,paused=false,gameOver=false;
-let last=0,elapsed=0,score=0,starCount=0,lives=3;
+let last=0,elapsed=0,score=0,starCount=0,lives=5;
 let speed=265,spawnTimer=0,invincible=0;
 let objects=[],particles=[];
 let best=Number(localStorage.getItem("milosBirthdayBest")||0);
@@ -219,7 +219,7 @@ function section(id){
 function startGame(){
  section("gameScreen");
  running=true;paused=false;gameOver=false;
- last=performance.now();elapsed=0;score=0;starCount=0;lives=3;
+ last=performance.now();elapsed=0;score=0;starCount=0;lives=5;
  speed=265;spawnTimer=1.0;invincible=0;objects=[];particles=[];
  player.y=ground-player.h;player.vy=0;player.onGround=true;
  updateUI();
