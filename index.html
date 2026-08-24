@@ -1,10 +1,22 @@
-<!DOCTYPE html>
+from pathlib import Path
+
+src = Path("/mnt/data/Texte collé(3).txt")
+text = src.read_text(encoding="utf-8")
+
+# Build a clean version by extracting the existing CSS/body structure and
+# replacing the end-reward section + gallery scripts with a robust implementation.
+# We keep the game's existing mechanics/content and cleanly separate CSS, HTML and JS.
+
+start = text.index("<!DOCTYPE html>")
+# We'll generate the full file explicitly, preserving the game's existing visual style and mechanics.
+html = r'''<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#090512">
 <title>Milos' Birthday Runner 🎂</title>
+
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#08040f;color:#fff}
@@ -22,9 +34,7 @@ button{border:0;border-radius:999px;padding:14px 24px;color:#fff;font-weight:900
 button.secondary{background:#ffffff12;box-shadow:none}
 .hero{font-size:88px;animation:float 2.8s ease-in-out infinite}
 @keyframes float{50%{transform:translateY(-12px)}}
-#space{position:fixed;inset:0;z-index:-2;background:
-radial-gradient(circle at 20% 15%,#42185b 0,transparent 30%),
-radial-gradient(circle at 80% 75%,#22205b 0,transparent 32%),#08040f}
+#space{position:fixed;inset:0;z-index:-2;background:radial-gradient(circle at 20% 15%,#42185b 0,transparent 30%),radial-gradient(circle at 80% 75%,#22205b 0,transparent 32%),#08040f}
 #stars{position:fixed;inset:0;z-index:-1;pointer-events:none}
 .star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;animation:twinkle 2s infinite alternate}
 @keyframes twinkle{to{opacity:.12;transform:scale(.5)}}
@@ -51,63 +61,48 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .choiceGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:25px}
 .choice{padding:22px 12px;border-radius:20px;background:#ffffff09;border:1px solid #ffffff12;cursor:pointer;font-weight:900;text-align:center}
 .choice:hover{background:#ffffff18}
-
-/* Audio Control Button */
 #audioControl{position:fixed;top:16px;right:16px;z-index:9999;background:#ffffff15;border:1px solid #ffffff25;backdrop-filter:blur(8px);border-radius:50px;padding:8px 16px;font-size:14px;cursor:pointer}
 
-/* Two Interactive Choice Blocks */
 .rewardsGrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
-.rewardBlock{padding:30px 20px;border-radius:24px;background:linear-gradient(135deg,#ffffff12,#ffffff05);border:2px solid #ff78b544;cursor:pointer;transition:transform .2s, border-color .2s;text-align:center}
+.rewardBlock{padding:30px 20px;border-radius:24px;background:linear-gradient(135deg,#ffffff12,#ffffff05);border:2px solid #ff78b544;cursor:pointer;transition:transform .2s,border-color .2s;text-align:center}
 .rewardBlock:hover{transform:translateY(-6px);border-color:#ff78b599;background:linear-gradient(135deg,#ffffff1a,#ffffff0d)}
 .rewardBlock .blockIcon{font-size:60px;margin-bottom:10px}
-
-/* Expandable Content Sections */
 .unlockedContent{margin-top:24px;padding:24px;border:1px solid #ffffff18;border-radius:24px;background:#ffffff05;backdrop-filter:blur(10px);text-align:left}
 
-/* Photo Gallery Grid (8 Pics) */
-.galleryGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
-.photoCard{aspect-ratio:1/1;border-radius:14px;overflow:hidden;background:#ffffff10;border:1px solid #ffffff18;cursor:pointer}
-.photoCard img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
-.photoCard:hover img{transform:scale(1.08)}
+/* 8-photo stack */
+.card-stack{position:relative;width:min(300px,75vw);height:min(400px,100vw);margin:30px auto;cursor:pointer}
+.card{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:16px;box-shadow:0 10px 25px #0006;border:4px solid #fff;opacity:0;transform:scale(.95) translateY(10px);transition:all .6s ease;pointer-events:none}
+.card.active{opacity:1;transform:scale(1) translateY(0);pointer-events:auto;z-index:2}
+.card.slide-out{opacity:0;transform:translateX(-120%) rotate(-10deg);z-index:3}
+.photoCounter{text-align:center;color:#bbb;font-size:14px;margin-top:-12px}
 
-/* Quiz Options */
+/* Quiz */
 .quizOptions{display:flex;flex-direction:column;gap:12px;margin-top:20px}
 .quizBtn{width:100%;padding:16px 20px;border-radius:16px;background:#ffffff12;border:1px solid #ffffff20;text-align:left;font-size:16px;cursor:pointer;transition:background .2s}
 .quizBtn:hover{background:#ffffff25}
 
 @media(max-width:850px){
 .rewardsGrid{grid-template-columns:1fr}
-.galleryGrid{grid-template-columns:repeat(4,1fr)}
 }
 @media(max-width:650px){
-.panel{padding:22px}
-.rules{grid-template-columns:repeat(2,1fr)}
-.choiceGrid{grid-template-columns:1fr}
-.galleryGrid{grid-template-columns:repeat(2,1fr)}
-#gameWrap{width:100%;max-width:100%}
-#game{min-height:0;aspect-ratio:4/3;border-radius:18px}
-.gameTop{font-size:13px;gap:5px}
-.stat{padding:7px 9px}
-.controls{gap:18px;margin-top:12px}
-.control{width:92px;height:64px;font-size:25px}
-.hint{font-size:11px}
+.panel{padding:22px}.rules{grid-template-columns:repeat(2,1fr)}.choiceGrid{grid-template-columns:1fr}
+#gameWrap{width:100%;max-width:100%}#game{min-height:0;aspect-ratio:4/3;border-radius:18px}
+.gameTop{font-size:13px;gap:5px}.stat{padding:7px 9px}.controls{gap:18px;margin-top:12px}.control{width:92px;height:64px;font-size:25px}.hint{font-size:11px}
 }
 @media(max-width:420px){
-.screen{padding:10px}
-.panel{padding:18px}
-#game{aspect-ratio:4/3}
-.control{width:96px;height:66px}
+.screen{padding:10px}.panel{padding:18px}#game{aspect-ratio:4/3}.control{width:96px;height:66px}
 }
 </style>
 </head>
-<body>
-<div id="space"></div><div id="stars"></div>
 
-<!-- Background Audio Controls -->
+<body>
+<div id="space"></div>
+<div id="stars"></div>
+
 <button id="audioControl" onclick="toggleAudio()">🎵 Sound: OFF</button>
 <audio id="bgMusic" loop src="our song.mp3"></audio>
 
-<!-- INTRO SCREEN -->
+<!-- INTRO -->
 <section id="intro" class="screen">
 <div class="panel center">
 <div class="hero">🎂</div>
@@ -131,7 +126,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 </div>
 </section>
 
-<!-- RUNNER GAME SCREEN -->
+<!-- GAME -->
 <section id="gameScreen" class="screen hidden">
 <div id="gameWrap">
 <div class="gameTop">
@@ -147,14 +142,14 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 </div>
 </div>
 <div class="controls">
-<button class="control" id="jumpBtn" aria-label="Jump">⬆️ JUMP</button>
-<button class="control" id="pauseBtn" aria-label="Pause">Ⅱ</button>
+<button class="control" id="jumpBtn">⬆️ JUMP</button>
+<button class="control" id="pauseBtn">Ⅱ</button>
 </div>
 <div class="hint">Collect ⭐ 🎂 🎁 and TRIXX 🧸 • Avoid 💀 and BLUE • Reach 20 stars!</div>
 </div>
 </section>
 
-<!-- GAME OVER SCREEN -->
+<!-- GAME OVER -->
 <section id="gameOver" class="screen hidden">
 <div class="panel center">
 <div style="font-size:70px">💀</div>
@@ -168,7 +163,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 </div>
 </section>
 
-<!-- BOSS SCREEN -->
+<!-- BOSS -->
 <section id="boss" class="screen hidden">
 <div class="panel center">
 <div class="hero">💙</div>
@@ -186,7 +181,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 </div>
 </section>
 
-<!-- BIRTHDAY QUIZZ SCREEN -->
+<!-- QUIZ -->
 <section id="quiz" class="screen hidden">
 <div class="panel center">
 <div class="hero">🧩</div>
@@ -194,15 +189,12 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 <h1>MILOS' BIRTHDAY QUIZ</h1>
 <p id="quizStepText">Question 1 of 3</p>
 <h2 id="quizQuestion" style="font-size:24px;margin:20px 0;">Who is turning 20 today?</h2>
-
-<div id="quizOptions" class="quizOptions">
-  <!-- Dynamic Options inserted here -->
-</div>
+<div id="quizOptions" class="quizOptions"></div>
 <p id="quizFeedback" style="margin-top:15px;font-weight:bold;color:#ff9dc6;"></p>
 </div>
 </section>
 
-<!-- WIN SCREEN WITH 2 INTERACTIVE BLOCKS -->
+<!-- FINAL WIN -->
 <section id="win" class="screen hidden">
 <div class="panel center">
 <div class="hero">🎉</div>
@@ -210,112 +202,52 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 <h1>HAPPY BIRTHDAY, MILOS ❤️</h1>
 <p><strong>BLUE IS DEFEATED! CHOOSE A BLOCK TO OPEN:</strong></p>
 
-<!-- THE 2 BLOCKS -->
 <div class="rewardsGrid">
-  <div class="rewardBlock" onclick="openBlock('picsBlock')">
-    <div class="blockIcon">🖼️</div>
-    <h2>BLOCK 1</h2>
-    <p><strong>Memory Album (8 Photos)</strong></p>
-    <button style="margin-top:10px;pointer-events:none">OPEN BLOCK ✨</button>
-  </div>
-
-  <div class="rewardBlock" onclick="openBlock('letterBlock')">
-    <div class="blockIcon">💌</div>
-    <h2>BLOCK 2</h2>
-    <p><strong>Birthday Letter & Gift</strong></p>
-    <button style="margin-top:10px;pointer-events:none">OPEN BLOCK ✨</button>
-  </div>
+<div class="rewardBlock" onclick="openBlock('picsBlock')">
+<div class="blockIcon">🖼️</div>
+<h2>BLOCK 1</h2>
+<p><strong>Memory Album (8 Photos)</strong></p>
+<button style="margin-top:10px;pointer-events:none">OPEN BLOCK ✨</button>
 </div>
 
-<!-- CONTENT DISPLAY FOR BLOCK 1 (8 PICS) -->
+<div class="rewardBlock" onclick="openBlock('letterBlock')">
+<div class="blockIcon">💌</div>
+<h2>BLOCK 2</h2>
+<p><strong>Birthday Letter & Gift</strong></p>
+<button style="margin-top:10px;pointer-events:none">OPEN BLOCK ✨</button>
+</div>
+</div>
+
+<!-- PHOTO BLOCK -->
 <div id="picsBlock" class="unlockedContent hidden">
-  <h3 style="margin-top:0;font-size:22px;color:#ff9dc6;border-bottom:1px solid #ffffff15;padding-bottom:12px">📸 MEMORY GALLERY (8 PICS)</h3>
-  <!-- 1. CSS STYLING (Put inside <head> or anywhere near the top of index.html) -->
-<style>
-.card-stack {
-  position: relative;
-  width: 300px;
-  height: 400px;
-  margin: 30px auto;
-  cursor: pointer;
-}
+<h3 style="margin-top:0;font-size:22px;color:#ff9dc6;border-bottom:1px solid #ffffff15;padding-bottom:12px">
+📸 MEMORY GALLERY
+</h3>
 
-.card {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-  border: 4px solid #ffffff;
-  opacity: 0;
-  transform: scale(0.95) translateY(10px);
-  transition: all 0.6s ease;
-  pointer-events: none;
-}
-
-/* Active photo */
-.card.active {
-  opacity: 1;
-  transform: scale(1) translateY(0);
-  pointer-events: auto;
-  z-index: 2;
-}
-
-/* Photo sliding out */
-.card.slide-out {
-  opacity: 0;
-  transform: translateX(-120%) rotate(-10deg);
-  z-index: 3;
-}
-</style>
-
-
-<!-- 2. HTML GALLERY (Replace your current 8 <img> tags with this) -->
-<div class="card-stack" onclick="nextCard()">
-  <img src="photo1.jpeg" alt="Memory 1" class="card active">
-  <img src="photo2.jpeg" alt="Memory 2" class="card">
-  <img src="photo3.jpeg" alt="Memory 3" class="card">
-  <img src="photo4.jpeg" alt="Memory 4" class="card">
-  <img src="photo5.jpeg" alt="Memory 5" class="card">
-  <img src="photo6.jpeg" alt="Memory 6" class="card">
-  <img src="photo7.jpeg" alt="Memory 7" class="card">
-  <img src="photo8.jpeg" alt="Memory 8" class="card">
+<div class="card-stack" id="cardStack" onclick="nextCard()">
+<img src="photo1.jpeg" alt="Memory 1" class="card active">
+<img src="photo2.jpeg" alt="Memory 2" class="card">
+<img src="photo3.jpeg" alt="Memory 3" class="card">
+<img src="photo4.jpeg" alt="Memory 4" class="card">
+<img src="photo5.jpeg" alt="Memory 5" class="card">
+<img src="photo6.jpeg" alt="Memory 6" class="card">
+<img src="photo7.jpeg" alt="Memory 7" class="card">
+<img src="photo8.jpeg" alt="Memory 8" class="card">
 </div>
-<p style="text-align: center; color: #888; font-size: 14px;">(Click the photo to reveal the next memory ✨)</p>
 
+<p id="photoCounter" class="photoCounter">Photo 1 / 8</p>
+<p style="text-align:center;color:#888;font-size:14px">
+Click the photo to reveal the next memory ✨
+</p>
+</div>
 
-<!-- 3. JAVASCRIPT (Put before the closing </body> tag near the bottom of index.html) -->
-<script>
-let currentCardIndex = 0;
-
-function nextCard() {
-  const cards = document.querySelectorAll('.card-stack .card');
-  if (cards.length === 0) return;
-
-  const activeCard = cards[currentCardIndex];
-  
-  // Slide out current card
-  activeCard.classList.add('slide-out');
-  activeCard.classList.remove('active');
-
-  // Loop back to 0 after card 8
-  currentCardIndex = (currentCardIndex + 1) % cards.length;
-  const nextCardElement = cards[currentCardIndex];
-
-  setTimeout(() => {
-    activeCard.classList.remove('slide-out');
-    nextCardElement.classList.add('active');
-  }, 300);
-}
-</script>
-
-<!-- CONTENT DISPLAY FOR BLOCK 2 (LETTER & PRESENT) -->
+<!-- LETTER + GIFT BLOCK -->
 <div id="letterBlock" class="unlockedContent hidden">
-  <h3 style="margin-top:0;font-size:22px;color:#ff9dc6;border-bottom:1px solid #ffffff15;padding-bottom:12px">💌 THE BIRTHDAY LETTER</h3>
-  <div class="finalCard">
+<h3 style="margin-top:0;font-size:22px;color:#ff9dc6;border-bottom:1px solid #ffffff15;padding-bottom:12px">
+💌 THE BIRTHDAY LETTER
+</h3>
+
+<div class="finalCard">
 Hey Milos,
 
 Happy 20th birthday. ❤️
@@ -345,22 +277,24 @@ Happy birthday, Milos.
 I love you. ❤️
 
 — Galilos
-  </div>
+</div>
 
-  <div class="gift">
-    <div class="eyebrow">FINAL UNLOCK</div>
-    <div id="giftClosed">
-      <div class="giftIcon" onclick="openGift()">🎁</div>
-      <p style="margin:0;font-size:14px">Tap the present to open!</p>
-    </div>
-    <div id="giftOpen" class="hidden">
-      <div style="font-size:50px">💋</div>
-      <div class="reward">REWARD UNLOCKED</div>
-      <p>🎟️ One enormous real-life hug</p>
-      <p>💋 Unlimited kisses</p>
-      <p>🫂 All the cuddles waiting for you</p>
-    </div>
-  </div>
+<div class="gift">
+<div class="eyebrow">FINAL UNLOCK</div>
+
+<div id="giftClosed">
+<div class="giftIcon" onclick="openGift(event)">🎁</div>
+<p style="margin:0;font-size:14px">Tap the present to open!</p>
+</div>
+
+<div id="giftOpen" class="hidden">
+<div style="font-size:50px">💋</div>
+<div class="reward">REWARD UNLOCKED</div>
+<p>🎟️ One enormous real-life hug</p>
+<p>💋 Unlimited kisses</p>
+<p>🫂 All the cuddles waiting for you</p>
+</div>
+</div>
 </div>
 
 <br><br>
@@ -369,458 +303,691 @@ I love you. ❤️
 </section>
 
 <script>
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
-ctx.imageSmoothingEnabled=false;
+/* =========================
+   BASIC ELEMENTS
+========================= */
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+ctx.imageSmoothingEnabled = false;
 
-const W=960,H=540;
-const ground=430;
+const W = 960, H = 540;
+const ground = 430;
 
-let running=false,paused=false,gameOver=false;
-let last=0,elapsed=0,score=0,starCount=0,lives=5;
-let speed=265,spawnTimer=0,invincible=0;
-let objects=[],particles=[];
-let best=Number(localStorage.getItem("milosBirthdayBest")||0);
+let running = false;
+let paused = false;
+let gameOver = false;
+let last = 0;
+let elapsed = 0;
+let score = 0;
+let starCount = 0;
+let lives = 5;
+let speed = 265;
+let spawnTimer = 0;
+let invincible = 0;
+let objects = [];
+let particles = [];
 
-document.getElementById("best").textContent=best;
+let best = Number(localStorage.getItem("milosBirthdayBest") || 0);
+document.getElementById("best").textContent = best;
 
-const player={x:145,y:360,w:42,h:58,vy:0,onGround:true};
-const keys={};
+const player = {x:145,y:360,w:42,h:58,vy:0,onGround:true};
 
-/* Audio System */
+/* =========================
+   AUDIO
+========================= */
 const bgMusic = document.getElementById("bgMusic");
 let audioPlaying = false;
 
 function toggleAudio(){
- if(!audioPlaying){
-  bgMusic.play().then(()=>{
-   audioPlaying=true;
-   document.getElementById("audioControl").textContent="🎵 Sound: ON";
-  }).catch(()=>{});
- }else{
-  bgMusic.pause();
-  audioPlaying=false;
-  document.getElementById("audioControl").textContent="🎵 Sound: OFF";
- }
+    if(!audioPlaying){
+        bgMusic.play().then(()=>{
+            audioPlaying = true;
+            document.getElementById("audioControl").textContent = "🎵 Sound: ON";
+        }).catch(()=>{});
+    }else{
+        bgMusic.pause();
+        audioPlaying = false;
+        document.getElementById("audioControl").textContent = "🎵 Sound: OFF";
+    }
 }
 
 function startMusic(){
- if(!audioPlaying){
-  bgMusic.play().then(()=>{
-   audioPlaying=true;
-   document.getElementById("audioControl").textContent="🎵 Sound: ON";
-  }).catch(()=>{});
- }
+    if(!audioPlaying){
+        bgMusic.play().then(()=>{
+            audioPlaying = true;
+            document.getElementById("audioControl").textContent = "🎵 Sound: ON";
+        }).catch(()=>{});
+    }
 }
 
-/* Interactive Blocks Handler */
-function openBlock(blockId){
- document.getElementById("picsBlock").classList.add("hidden");
- document.getElementById("letterBlock").classList.add("hidden");
- const target = document.getElementById(blockId);
- target.classList.remove("hidden");
- target.scrollIntoView({behavior:"smooth"});
- confetti();
-}
-
+/* =========================
+   SCREEN NAVIGATION
+========================= */
 function section(id){
- document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));
- document.getElementById(id).classList.remove("hidden");
- window.scrollTo({top:0,behavior:"smooth"});
+    document.querySelectorAll(".screen").forEach(s => s.classList.add("hidden"));
+    document.getElementById(id).classList.remove("hidden");
+    window.scrollTo({top:0, behavior:"smooth"});
 }
 
+/* =========================
+   FINAL REWARD BLOCKS
+========================= */
+function openBlock(blockId){
+    const picsBlock = document.getElementById("picsBlock");
+    const letterBlock = document.getElementById("letterBlock");
+    const target = document.getElementById(blockId);
+
+    if(!target) return;
+
+    // Always hide both first.
+    picsBlock.classList.add("hidden");
+    letterBlock.classList.add("hidden");
+
+    // Open only the selected block.
+    target.classList.remove("hidden");
+
+    // Reset gift every time the letter block is opened.
+    if(blockId === "letterBlock"){
+        document.getElementById("giftClosed").classList.remove("hidden");
+        document.getElementById("giftOpen").classList.add("hidden");
+    }
+
+    setTimeout(() => {
+        target.scrollIntoView({
+            behavior:"smooth",
+            block:"start"
+        });
+    }, 100);
+
+    confetti();
+}
+
+function openGift(event){
+    if(event) event.stopPropagation();
+
+    document.getElementById("giftClosed").classList.add("hidden");
+    document.getElementById("giftOpen").classList.remove("hidden");
+
+    confetti();
+}
+
+/* =========================
+   8 PHOTO STACK
+========================= */
+let currentCardIndex = 0;
+
+function updatePhotoCounter(){
+    const cards = document.querySelectorAll("#cardStack .card");
+    document.getElementById("photoCounter").textContent =
+        `Photo ${currentCardIndex + 1} / ${cards.length}`;
+}
+
+function nextCard(){
+    const cards = document.querySelectorAll("#cardStack .card");
+    if(!cards.length) return;
+
+    const activeCard = cards[currentCardIndex];
+
+    activeCard.classList.remove("active");
+    activeCard.classList.add("slide-out");
+
+    currentCardIndex = (currentCardIndex + 1) % cards.length;
+
+    const next = cards[currentCardIndex];
+
+    setTimeout(() => {
+        // Put the old card back underneath.
+        activeCard.classList.remove("slide-out");
+
+        // Show the next one.
+        next.classList.add("active");
+
+        updatePhotoCounter();
+    }, 300);
+}
+
+updatePhotoCounter();
+
+/* =========================
+   GAME
+========================= */
 function startGame(){
- startMusic();
- section("gameScreen");
- running=true;paused=false;gameOver=false;
- last=performance.now();elapsed=0;score=0;starCount=0;lives=5;
- speed=265;spawnTimer=1.0;invincible=0;objects=[];particles=[];
- player.y=ground-player.h;player.vy=0;player.onGround=true;
- updateUI();
- showMessage("GO, MILOS!<br><small>Collect 20 stars. 🎂</small>",1000);
- requestAnimationFrame(loop);
+    startMusic();
+    section("gameScreen");
+
+    running = true;
+    paused = false;
+    gameOver = false;
+
+    last = performance.now();
+    elapsed = 0;
+    score = 0;
+    starCount = 0;
+    lives = 5;
+
+    speed = 265;
+    spawnTimer = 1.0;
+    invincible = 0;
+    objects = [];
+    particles = [];
+
+    player.y = ground - player.h;
+    player.vy = 0;
+    player.onGround = true;
+
+    updateUI();
+    showMessage("GO, MILOS!<br><small>Collect 20 stars. 🎂</small>",1000);
+
+    requestAnimationFrame(loop);
 }
 
 function jump(){
- if(!running||paused||gameOver)return;
- if(player.onGround){
-  player.vy=-735;
-  player.onGround=false;
- }
+    if(!running || paused || gameOver) return;
+
+    if(player.onGround){
+        player.vy = -735;
+        player.onGround = false;
+    }
 }
 
-document.addEventListener("keydown",e=>{
- keys[e.code]=true;
- if(e.code==="Space"||e.code==="ArrowUp"){
-  e.preventDefault();
-  jump();
- }
- if(e.code==="KeyP") togglePause();
-});
-document.addEventListener("keyup",e=>keys[e.code]=false);
+document.addEventListener("keydown", e=>{
+    if(e.code === "Space" || e.code === "ArrowUp"){
+        e.preventDefault();
+        jump();
+    }
 
-const jumpBtn=document.getElementById("jumpBtn");
-jumpBtn.addEventListener("pointerdown",e=>{e.preventDefault();jump()});
-document.getElementById("pauseBtn").addEventListener("pointerdown",e=>{e.preventDefault();togglePause()});
-canvas.addEventListener("pointerdown",e=>{e.preventDefault();jump();},{passive:false});
+    if(e.code === "KeyP"){
+        togglePause();
+    }
+});
+
+document.getElementById("jumpBtn").addEventListener("pointerdown", e=>{
+    e.preventDefault();
+    jump();
+});
+
+document.getElementById("pauseBtn").addEventListener("pointerdown", e=>{
+    e.preventDefault();
+    togglePause();
+});
+
+canvas.addEventListener("pointerdown", e=>{
+    e.preventDefault();
+    jump();
+},{passive:false});
 
 function togglePause(){
- if(!running||gameOver)return;
- paused=!paused;
- if(!paused){
-  last=performance.now();
-  requestAnimationFrame(loop);
-  hideMessage();
- }else{
-  showMessage("PAUSED<br><small>Tap Ⅱ to continue</small>",0);
- }
+    if(!running || gameOver) return;
+
+    paused = !paused;
+
+    if(!paused){
+        last = performance.now();
+        requestAnimationFrame(loop);
+        hideMessage();
+    }else{
+        showMessage("PAUSED<br><small>Tap Ⅱ to continue</small>",0);
+    }
 }
 
 function showMessage(html,ms){
- const box=document.getElementById("gameMessage");
- document.getElementById("gameMessageText").innerHTML=html;
- box.classList.remove("hidden");
- if(ms) setTimeout(()=>{if(!paused)hideMessage()},ms);
+    const box = document.getElementById("gameMessage");
+    document.getElementById("gameMessageText").innerHTML = html;
+    box.classList.remove("hidden");
+
+    if(ms){
+        setTimeout(()=>{
+            if(!paused) hideMessage();
+        },ms);
+    }
 }
-function hideMessage(){document.getElementById("gameMessage").classList.add("hidden")}
+
+function hideMessage(){
+    document.getElementById("gameMessage").classList.add("hidden");
+}
 
 function updateUI(){
- document.getElementById("starsScore").textContent=starCount;
- document.getElementById("score").textContent=Math.floor(score);
- document.getElementById("lives").textContent=lives;
- document.getElementById("best").textContent=best;
+    document.getElementById("starsScore").textContent = starCount;
+    document.getElementById("score").textContent = Math.floor(score);
+    document.getElementById("lives").textContent = lives;
+    document.getElementById("best").textContent = best;
 }
 
 function spawn(){
- const r=Math.random();
- let type;
- if(r<.43)type="star";
- else if(r<.58)type="cake";
- else if(r<.70)type="gift";
- else if(r<.78)type="trixx";
- else if(r<.90)type="rock";
- else type="blue";
+    const r = Math.random();
+    let type;
 
- const data={
-  star:{emoji:"⭐",value:1,w:34,h:34},
-  cake:{emoji:"🎂",value:3,w:42,h:42},
-  gift:{emoji:"🎁",value:5,w:42,h:42},
-  trixx:{emoji:"🧸",value:10,w:45,h:45},
-  rock:{emoji:"💀",value:0,w:45,h:50},
-  blue:{emoji:"💙",value:0,w:52,h:58}
- }[type];
+    if(r < .43) type = "star";
+    else if(r < .58) type = "cake";
+    else if(r < .70) type = "gift";
+    else if(r < .78) type = "trixx";
+    else if(r < .90) type = "rock";
+    else type = "blue";
 
- const y=type==="rock"||type==="blue"?ground-data.h:ground-110-Math.random()*80;
+    const data = {
+        star:{emoji:"⭐",value:1,w:34,h:34},
+        cake:{emoji:"🎂",value:3,w:42,h:42},
+        gift:{emoji:"🎁",value:5,w:42,h:42},
+        trixx:{emoji:"🧸",value:10,w:45,h:45},
+        rock:{emoji:"💀",value:0,w:45,h:50},
+        blue:{emoji:"💙",value:0,w:52,h:58}
+    }[type];
 
- objects.push({
-  type,x:W+30,y,w:data.w,h:data.h,
-  emoji:data.emoji,value:data.value,
-  bob:Math.random()*Math.PI*2
- });
+    const y = type==="rock" || type==="blue"
+        ? ground-data.h
+        : ground-110-Math.random()*80;
+
+    objects.push({
+        type,
+        x:W+30,
+        y,
+        w:data.w,
+        h:data.h,
+        emoji:data.emoji,
+        value:data.value,
+        bob:Math.random()*Math.PI*2
+    });
 }
 
 function rectHit(a,b){
- const pad=8;
- return a.x+pad<b.x+b.w-pad &&
-        a.x+a.w-pad>b.x+pad &&
-        a.y+pad<b.y+b.h-pad &&
-        a.y+a.h-pad>b.y+pad;
+    const pad = 8;
+
+    return a.x+pad < b.x+b.w-pad &&
+           a.x+a.w-pad > b.x+pad &&
+           a.y+pad < b.y+b.h-pad &&
+           a.y+a.h-pad > b.y+pad;
 }
 
 function collect(o){
- score+=o.value*10;
- if(o.type==="star"){
-  starCount++;
-  burst(o.x+o.w/2,o.y+o.h/2,"⭐");
-  if(starCount===10)showMessage("10 STARS!<br><small>Halfway, birthday boy. 🔥</small>",900);
-  if(starCount>=20){
-   winRunnerGame();
-   return;
-  }
- }
- if(o.type==="trixx"){
-  invincible=3;
-  showMessage("🧸 TRIXX POWER!<br><small>Invincible for 3 seconds!</small>",900);
-  burst(o.x+o.w/2,o.y+o.h/2,"❤️");
- }
- burst(o.x+o.w/2,o.y+o.h/2,o.emoji);
+    score += o.value*10;
+
+    if(o.type === "star"){
+        starCount++;
+        burst(o.x+o.w/2,o.y+o.h/2,"⭐");
+
+        if(starCount === 10){
+            showMessage("10 STARS!<br><small>Halfway, birthday boy. 🔥</small>",900);
+        }
+
+        if(starCount >= 20){
+            winRunnerGame();
+            return;
+        }
+    }
+
+    if(o.type === "trixx"){
+        invincible = 3;
+        showMessage("🧸 TRIXX POWER!<br><small>Invincible for 3 seconds!</small>",900);
+        burst(o.x+o.w/2,o.y+o.h/2,"❤️");
+    }
+
+    burst(o.x+o.w/2,o.y+o.h/2,o.emoji);
 }
 
 function hurt(o){
- if(invincible>0)return;
- lives--;
- invincible=1.2;
- burst(player.x+player.w/2,player.y+player.h/2,"💥");
- if(o.type==="blue")showMessage("💙 BLUE ATTACKED!<br><small>Trixx is not impressed.</small>",800);
- if(lives<=0){
-  endGame();
- }
+    if(invincible > 0) return;
+
+    lives--;
+    invincible = 1.2;
+
+    burst(player.x+player.w/2,player.y+player.h/2,"💥");
+
+    if(o.type === "blue"){
+        showMessage("💙 BLUE ATTACKED!<br><small>Trixx is not impressed.</small>",800);
+    }
+
+    if(lives <= 0){
+        endGame();
+    }
 }
 
 function endGame(){
- running=false;gameOver=true;
- document.getElementById("overStars").textContent=starCount;
- document.getElementById("overScore").textContent=Math.floor(score);
- section("gameOver");
+    running = false;
+    gameOver = true;
+
+    document.getElementById("overStars").textContent = starCount;
+    document.getElementById("overScore").textContent = Math.floor(score);
+
+    section("gameOver");
 }
 
 function winRunnerGame(){
- running=false;gameOver=false;
- best=Math.max(best,Math.floor(score));
- localStorage.setItem("milosBirthdayBest",best);
- burst(W/2,H/2,"🎉");
- section("boss");
+    running = false;
+    gameOver = false;
+
+    best = Math.max(best,Math.floor(score));
+    localStorage.setItem("milosBirthdayBest",best);
+
+    burst(W/2,H/2,"🎉");
+    section("boss");
 }
 
 function loop(now){
- if(!running||gameOver)return;
- if(paused)return;
- const dt=Math.min(.033,(now-last)/1000);
- last=now;
- elapsed+=dt;
- update(dt);
- draw();
- if(running)requestAnimationFrame(loop);
+    if(!running || gameOver) return;
+    if(paused) return;
+
+    const dt = Math.min(.033,(now-last)/1000);
+    last = now;
+
+    elapsed += dt;
+    update(dt);
+    draw();
+
+    if(running) requestAnimationFrame(loop);
 }
 
 function update(dt){
- speed=330+Math.min(180,elapsed*7);
- spawnTimer-=dt;
- if(spawnTimer<=0){
-  spawn();
-  spawnTimer=.65+Math.random()*.65-Math.min(.25,elapsed*.005);
- }
+    speed = 330 + Math.min(180,elapsed*7);
 
- player.vy+=1680*dt;
- player.y+=player.vy*dt;
- if(player.y+player.h>=ground){
-  player.y=ground-player.h;
-  player.vy=0;
-  player.onGround=true;
- }else player.onGround=false;
+    spawnTimer -= dt;
 
- invincible=Math.max(0,invincible-dt);
+    if(spawnTimer <= 0){
+        spawn();
+        spawnTimer = .65 + Math.random()*.65 - Math.min(.25,elapsed*.005);
+    }
 
- objects.forEach(o=>{
-  o.x-=speed*dt;
-  o.bob+=dt*5;
-  if(rectHit(player,o)){
-   if(["star","cake","gift","trixx"].includes(o.type))collect(o);
-   else hurt(o);
-   o.x=-200;
-  }
- });
+    player.vy += 1680*dt;
+    player.y += player.vy*dt;
 
- objects=objects.filter(o=>o.x>-100);
+    if(player.y+player.h >= ground){
+        player.y = ground-player.h;
+        player.vy = 0;
+        player.onGround = true;
+    }else{
+        player.onGround = false;
+    }
 
- particles.forEach(p=>{
-  p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=500*dt;p.life-=dt;
- });
- particles=particles.filter(p=>p.life>0);
+    invincible = Math.max(0,invincible-dt);
 
- score+=dt*2;
- updateUI();
+    objects.forEach(o=>{
+        o.x -= speed*dt;
+        o.bob += dt*5;
+
+        if(rectHit(player,o)){
+            if(["star","cake","gift","trixx"].includes(o.type)){
+                collect(o);
+            }else{
+                hurt(o);
+            }
+
+            o.x = -200;
+        }
+    });
+
+    objects = objects.filter(o=>o.x > -100);
+
+    particles.forEach(p=>{
+        p.x += p.vx*dt;
+        p.y += p.vy*dt;
+        p.vy += 500*dt;
+        p.life -= dt;
+    });
+
+    particles = particles.filter(p=>p.life > 0);
+
+    score += dt*2;
+    updateUI();
 }
 
 function draw(){
- ctx.clearRect(0,0,W,H);
+    ctx.clearRect(0,0,W,H);
 
- // sky
- const grad=ctx.createLinearGradient(0,0,0,H);
- grad.addColorStop(0,"#120a2b");
- grad.addColorStop(1,"#08050e");
- ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+    const grad = ctx.createLinearGradient(0,0,0,H);
+    grad.addColorStop(0,"#120a2b");
+    grad.addColorStop(1,"#08050e");
 
- // moon
- ctx.fillStyle="#fff1b8";
- ctx.beginPath();ctx.arc(780,90,43,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,W,H);
 
- // stars
- for(let i=0;i<65;i++){
-  const x=(i*157+elapsed*18)%W;
-  const y=(i*73)%300;
-  ctx.fillStyle=i%7===0?"#ff9bc4":"#fff";
-  ctx.globalAlpha=.55+(i%5)/10;
-  ctx.fillRect(x,y,2+(i%2),2+(i%2));
- }
- ctx.globalAlpha=1;
+    ctx.fillStyle = "#fff1b8";
+    ctx.beginPath();
+    ctx.arc(780,90,43,0,Math.PI*2);
+    ctx.fill();
 
- // distant skyline
- ctx.fillStyle="#0e0920";
- for(let x=0;x<W;x+=55){
-  const bh=40+(x*17%90);
-  ctx.fillRect(x,ground-bh,45,bh);
- }
+    for(let i=0;i<65;i++){
+        const x = (i*157+elapsed*18)%W;
+        const y = (i*73)%300;
 
- // ground
- ctx.fillStyle="#1d1230";ctx.fillRect(0,ground,W,H-ground);
- ctx.fillStyle="#ff6fae";
- for(let x=-(elapsed*speed)%80;x<W;x+=80)ctx.fillRect(x,ground,40,4);
+        ctx.fillStyle = i%7===0 ? "#ff9bc4" : "#fff";
+        ctx.globalAlpha = .55+(i%5)/10;
+        ctx.fillRect(x,y,2+(i%2),2+(i%2));
+    }
 
- // objects
- objects.forEach(o=>{
-  ctx.font=(o.h*.9)+"px serif";
-  ctx.textAlign="center";ctx.textBaseline="middle";
-  ctx.fillText(o.emoji,o.x+o.w/2,o.y+o.h/2+Math.sin(o.bob)*4);
- });
+    ctx.globalAlpha = 1;
 
- // player pixel-style
- const flash=invincible>0 && Math.floor(invincible*12)%2===0;
- if(!flash){
-  ctx.fillStyle="#ff76b3";
-  ctx.fillRect(player.x+9,player.y+17,25,32);
-  ctx.fillStyle="#ffd7e7";
-  ctx.fillRect(player.x+6,player.y,31,27);
-  ctx.fillStyle="#24102b";
-  ctx.fillRect(player.x+12,player.y+9,4,5);
-  ctx.fillRect(player.x+27,player.y+9,4,5);
-  ctx.fillStyle="#9a79ff";
-  ctx.fillRect(player.x+4,player.y+48,13,10);
-  ctx.fillRect(player.x+27,player.y+48,13,10);
-  // birthday hat
-  ctx.fillStyle="#ffdf6e";
-  ctx.beginPath();ctx.moveTo(player.x+20,player.y-17);ctx.lineTo(player.x+7,player.y+2);ctx.lineTo(player.x+33,player.y+2);ctx.closePath();ctx.fill();
-  ctx.fillStyle="#fff";ctx.fillRect(player.x+18,player.y-21,5,5);
- }
+    ctx.fillStyle = "#0e0920";
 
- // particles
- particles.forEach(p=>{
-  ctx.globalAlpha=Math.max(0,p.life/.9);
-  ctx.font="22px serif";ctx.fillText(p.text,p.x,p.y);
- });
- ctx.globalAlpha=1;
+    for(let x=0;x<W;x+=55){
+        const bh = 40+(x*17%90);
+        ctx.fillRect(x,ground-bh,45,bh);
+    }
+
+    ctx.fillStyle = "#1d1230";
+    ctx.fillRect(0,ground,W,H-ground);
+
+    ctx.fillStyle = "#ff6fae";
+
+    for(let x=-(elapsed*speed)%80;x<W;x+=80){
+        ctx.fillRect(x,ground,40,4);
+    }
+
+    objects.forEach(o=>{
+        ctx.font = (o.h*.9)+"px serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(o.emoji,o.x+o.w/2,o.y+o.h/2+Math.sin(o.bob)*4);
+    });
+
+    const flash = invincible>0 && Math.floor(invincible*12)%2===0;
+
+    if(!flash){
+        ctx.fillStyle="#ff76b3";
+        ctx.fillRect(player.x+9,player.y+17,25,32);
+
+        ctx.fillStyle="#ffd7e7";
+        ctx.fillRect(player.x+6,player.y,31,27);
+
+        ctx.fillStyle="#24102b";
+        ctx.fillRect(player.x+12,player.y+9,4,5);
+        ctx.fillRect(player.x+27,player.y+9,4,5);
+
+        ctx.fillStyle="#9a79ff";
+        ctx.fillRect(player.x+4,player.y+48,13,10);
+        ctx.fillRect(player.x+27,player.y+48,13,10);
+
+        ctx.fillStyle="#ffdf6e";
+        ctx.beginPath();
+        ctx.moveTo(player.x+20,player.y-17);
+        ctx.lineTo(player.x+7,player.y+2);
+        ctx.lineTo(player.x+33,player.y+2);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle="#fff";
+        ctx.fillRect(player.x+18,player.y-21,5,5);
+    }
+
+    particles.forEach(p=>{
+        ctx.globalAlpha = Math.max(0,p.life/.9);
+        ctx.font = "22px serif";
+        ctx.fillText(p.text,p.x,p.y);
+    });
+
+    ctx.globalAlpha = 1;
 }
 
 function burst(x,y,text){
- for(let i=0;i<10;i++){
-  particles.push({
-   x,y,text,
-   vx:(Math.random()-.5)*220,
-   vy:-80-Math.random()*220,
-   life:.6+Math.random()*.4
-  });
- }
+    for(let i=0;i<10;i++){
+        particles.push({
+            x,y,text,
+            vx:(Math.random()-.5)*220,
+            vy:-80-Math.random()*220,
+            life:.6+Math.random()*.4
+        });
+    }
 }
 
+/* =========================
+   CONFETTI
+========================= */
 function confetti(){
- const emojis=["🎉","🎂","❤️","⭐","🎁","🧸","✨"];
- for(let i=0;i<100;i++){
-  const e=document.createElement("span");
-  e.textContent=emojis[Math.floor(Math.random()*emojis.length)];
-  e.style.position="fixed";
-  e.style.left=Math.random()*100+"vw";
-  e.style.top="-30px";
-  e.style.fontSize=(15+Math.random()*28)+"px";
-  e.style.zIndex=1000;
-  e.style.pointerEvents="none";
-  e.style.transition="transform 3s linear,opacity 3s";
-  document.body.appendChild(e);
-  setTimeout(()=>{
-   e.style.transform=`translateY(120vh) rotate(${Math.random()*1000-500}deg)`;
-   e.style.opacity="0";
-  },30);
-  setTimeout(()=>e.remove(),3100);
- }
+    const emojis=["🎉","🎂","❤️","⭐","🎁","🧸","✨"];
+
+    for(let i=0;i<100;i++){
+        const e=document.createElement("span");
+
+        e.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+        e.style.position="fixed";
+        e.style.left=Math.random()*100+"vw";
+        e.style.top="-30px";
+        e.style.fontSize=(15+Math.random()*28)+"px";
+        e.style.zIndex=1000;
+        e.style.pointerEvents="none";
+        e.style.transition="transform 3s linear,opacity 3s";
+
+        document.body.appendChild(e);
+
+        setTimeout(()=>{
+            e.style.transform=`translateY(120vh) rotate(${Math.random()*1000-500}deg)`;
+            e.style.opacity="0";
+        },30);
+
+        setTimeout(()=>e.remove(),3100);
+    }
 }
 
-function openGift(){
- document.getElementById("giftClosed").classList.add("hidden");
- document.getElementById("giftOpen").classList.remove("hidden");
- confetti();
-}
-
-function viewPhoto(src){
- window.open(src, '_blank');
-}
-
+/* =========================
+   BACKGROUND STARS
+========================= */
 for(let i=0;i<110;i++){
- const s=document.createElement("i");
- s.className="star";
- s.style.left=Math.random()*100+"%";
- s.style.top=Math.random()*100+"%";
- const size=1+Math.random()*3;
- s.style.width=size+"px";s.style.height=size+"px";
- s.style.animationDelay=Math.random()*3+"s";
- document.getElementById("stars").appendChild(s);
+    const s=document.createElement("i");
+
+    s.className="star";
+    s.style.left=Math.random()*100+"%";
+    s.style.top=Math.random()*100+"%";
+
+    const size=1+Math.random()*3;
+    s.style.width=size+"px";
+    s.style.height=size+"px";
+    s.style.animationDelay=Math.random()*3+"s";
+
+    document.getElementById("stars").appendChild(s);
 }
 
-/* --- BOSS LOGIC --- */
-let hp=5;
+/* =========================
+   BOSS
+========================= */
+let hp = 5;
+
 function hitBoss(kind){
- let damage=kind==="kiss"?2:1;
- hp-=damage;
- document.getElementById("bossHP").style.width=Math.max(0,hp)/5*100+"%";
- document.getElementById("hpText").textContent=Math.max(0,hp);
- document.getElementById("bossResult").textContent=kind==="trixx"?"🧸 TRIXX ATTACK!":kind==="kiss"?"💋 CRITICAL HIT!":"❤️ HEART HIT!";
- if(hp<=0){
-  document.getElementById("bossResult").innerHTML="💥 BLUE HAS BEEN DEFEATED.<br><br><button onclick='startQuiz()'>PROCEED TO SECURITY QUIZ 🧩 →</button>";
- }
+    let damage = kind==="kiss" ? 2 : 1;
+
+    hp -= damage;
+
+    document.getElementById("bossHP").style.width =
+        Math.max(0,hp)/5*100+"%";
+
+    document.getElementById("hpText").textContent = Math.max(0,hp);
+
+    document.getElementById("bossResult").textContent =
+        kind==="trixx"
+        ? "🧸 TRIXX ATTACK!"
+        : kind==="kiss"
+        ? "💋 CRITICAL HIT!"
+        : "❤️ HEART HIT!";
+
+    if(hp <= 0){
+        document.getElementById("bossResult").innerHTML =
+            "💥 BLUE HAS BEEN DEFEATED.<br><br>" +
+            "<button onclick='startQuiz()'>PROCEED TO SECURITY QUIZ 🧩 →</button>";
+    }
 }
 
-/* --- QUIZ LOGIC --- */
+/* =========================
+   QUIZ
+========================= */
 const quizData = [
-  {
-    q: "Who is turning 20 years old today? 🎂",
-    options: ["Milos ❤️", "Blue 💙", "Trixx 🧸", "Some random guy"],
-    answer: 0
-  },
-  {
-    q: "Who is the ultimate hero that defeated Blue?",
-    options: ["Gali", "Milos & Trixx 🧸", "A giant cake", "No one"],
-    answer: 1
-  },
-  {
-    q: "What is waiting inside the birthday blocks?",
-    options: ["Homework", "Nothing", "8 Photos, a Letter & a Special Gift 🎁", "More Blue attacks"],
-    answer: 2
-  }
+    {
+        q:"Who is turning 20 years old today? 🎂",
+        options:["Milos ❤️","Blue 💙","Trixx 🧸","Some random guy"],
+        answer:0
+    },
+    {
+        q:"Who is the ultimate hero that defeated Blue?",
+        options:["Gali","Milos & Trixx 🧸","A giant cake","No one"],
+        answer:1
+    },
+    {
+        q:"What is waiting inside the birthday blocks?",
+        options:["Homework","Nothing","8 Photos, a Letter & a Special Gift 🎁","More Blue attacks"],
+        answer:2
+    }
 ];
 
 let currentQuestion = 0;
 
 function startQuiz(){
-  currentQuestion = 0;
-  section("quiz");
-  loadQuizQuestion();
+    currentQuestion = 0;
+    section("quiz");
+    loadQuizQuestion();
 }
 
 function loadQuizQuestion(){
-  const data = quizData[currentQuestion];
-  document.getElementById("quizStepText").textContent = `Question ${currentQuestion + 1} of ${quizData.length}`;
-  document.getElementById("quizQuestion").textContent = data.q;
-  document.getElementById("quizFeedback").textContent = "";
-  
-  const optionsBox = document.getElementById("quizOptions");
-  optionsBox.innerHTML = "";
-  
-  data.options.forEach((opt, idx) => {
-    const btn = document.createElement("button");
-    btn.className = "quizBtn";
-    btn.textContent = `${idx + 1}. ${opt}`;
-    btn.onclick = () => checkAnswer(idx);
-    optionsBox.appendChild(btn);
-  });
+    const data = quizData[currentQuestion];
+
+    document.getElementById("quizStepText").textContent =
+        `Question ${currentQuestion+1} of ${quizData.length}`;
+
+    document.getElementById("quizQuestion").textContent = data.q;
+    document.getElementById("quizFeedback").textContent = "";
+
+    const optionsBox = document.getElementById("quizOptions");
+    optionsBox.innerHTML = "";
+
+    data.options.forEach((opt,idx)=>{
+        const btn=document.createElement("button");
+
+        btn.className="quizBtn";
+        btn.textContent=`${idx+1}. ${opt}`;
+        btn.onclick=()=>checkAnswer(idx);
+
+        optionsBox.appendChild(btn);
+    });
 }
 
 function checkAnswer(chosenIdx){
-  const data = quizData[currentQuestion];
-  if(chosenIdx === data.answer){
-    document.getElementById("quizFeedback").style.color = "#8bff90";
-    document.getElementById("quizFeedback").textContent = "✨ Correct!";
-    setTimeout(() => {
-      currentQuestion++;
-      if(currentQuestion < quizData.length){
-        loadQuizQuestion();
-      } else {
-        section("win");
-        confetti();
-      }
-    }, 600);
-  } else {
-    document.getElementById("quizFeedback").style.color = "#ff7272";
-    document.getElementById("quizFeedback").textContent = "❌ Try again!";
-  }
+    const data=quizData[currentQuestion];
+
+    if(chosenIdx === data.answer){
+        const feedback=document.getElementById("quizFeedback");
+
+        feedback.style.color="#8bff90";
+        feedback.textContent="✨ Correct!";
+
+        setTimeout(()=>{
+            currentQuestion++;
+
+            if(currentQuestion < quizData.length){
+                loadQuizQuestion();
+            }else{
+                section("win");
+                confetti();
+            }
+        },600);
+    }else{
+        const feedback=document.getElementById("quizFeedback");
+
+        feedback.style.color="#ff7272";
+        feedback.textContent="❌ Try again!";
+    }
 }
 </script>
 </body>
 </html>
+'''
+
+out = Path("/mnt/data/Milos_Birthday_Runner_CLEAN.html")
+out.write_text(html, encoding="utf-8")
+
+print(f"Created: {out}")
+print(f"Size: {out.stat().st_size:,} bytes")
