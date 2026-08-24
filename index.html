@@ -51,10 +51,30 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .choiceGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:25px}
 .choice{padding:22px 12px;border-radius:20px;background:#ffffff09;border:1px solid #ffffff12;cursor:pointer;font-weight:900;text-align:center}
 .choice:hover{background:#ffffff18}
+
+/* Audio Controller */
+#audioControl{position:fixed;top:16px;right:16px;z-index:9999;background:#ffffff15;border:1px solid #ffffff25;backdrop-filter:blur(8px);border-radius:50px;padding:8px 16px;font-size:14px;cursor:pointer}
+
+/* Two Blocks Victory Layout */
+.winContainer{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;text-align:left}
+.winBlock{padding:24px;border:1px solid #ffffff18;border-radius:24px;background:#ffffff05;backdrop-filter:blur(10px)}
+.winBlock h3{margin-top:0;font-size:22px;color:#ff9dc6;border-bottom:1px solid #ffffff15;padding-bottom:12px}
+
+/* Photo Gallery Grid (8 Pics) */
+.galleryGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.photoCard{aspect-ratio:1/1;border-radius:14px;overflow:hidden;background:#ffffff10;border:1px solid #ffffff18;position:relative;cursor:pointer}
+.photoCard img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.photoCard:hover img{transform:scale(1.08)}
+
+@media(max-width:850px){
+.winContainer{grid-template-columns:1fr}
+.galleryGrid{grid-template-columns:repeat(4,1fr)}
+}
 @media(max-width:650px){
 .panel{padding:22px}
 .rules{grid-template-columns:repeat(2,1fr)}
 .choiceGrid{grid-template-columns:1fr}
+.galleryGrid{grid-template-columns:repeat(2,1fr)}
 #gameWrap{width:100%;max-width:100%}
 #game{min-height:0;aspect-ratio:4/3;border-radius:18px}
 .gameTop{font-size:13px;gap:5px}
@@ -74,6 +94,10 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 <body>
 <div id="space"></div><div id="stars"></div>
 
+<!-- Background Audio Controls -->
+<button id="audioControl" onclick="toggleAudio()">🎵 Sound: OFF</button>
+<audio id="bgMusic" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3"></audio>
+
 <!-- INTRO SCREEN -->
 <section id="intro" class="screen">
 <div class="panel center">
@@ -83,7 +107,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 <p><strong>PLAYER:</strong> MILOS</p>
 <p><strong>AGE UNLOCKED:</strong> 20 🎂</p>
 <p>Your mission is simple:</p>
-<p><strong>Collect 20 birthday stars to unlock the final boss & secret levels!</strong></p>
+<p><strong>Collect 20 birthday stars to unlock the final boss!</strong></p>
 <div class="rules">
 <div class="rule">⭐<b>+1</b><span>STAR</span></div>
 <div class="rule">🎂<b>+3</b><span>CAKE</span></div>
@@ -153,45 +177,35 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 </div>
 </section>
 
-<!-- MAZE SCREEN -->
-<section id="maze" class="screen hidden">
-<div class="panel center">
-<div class="hero">🧸</div>
-<div class="eyebrow">BONUS LEVEL</div>
-<h2>FIND TRIXX</h2>
-<p>Trixx wandered into the birthday maze. Choose the right door to find him!</p>
-<div class="choiceGrid">
-<div class="choice" onclick="door(0)">🚪 PARIS</div>
-<div class="choice" onclick="door(1)">🚪 TUNISIA</div>
-<div class="choice" onclick="door(2)">🚪 THE VOID</div>
-</div>
-<p id="doorResult" style="margin-top:20px;font-weight:bold;"></p>
-</div>
-</section>
-
-<!-- QUIZ SCREEN -->
-<section id="quiz" class="screen hidden">
-<div class="panel center">
-<div class="eyebrow">SECRET LEVEL</div>
-<h2>HOW WELL DO YOU KNOW US?</h2>
-<p id="q" style="font-size:22px;font-weight:bold;margin:20px 0;"></p>
-<div class="choiceGrid" id="answers"></div>
-<p id="quizResult" style="margin-top:20px;font-weight:bold;"></p>
-</div>
-</section>
-
-<!-- WIN SCREEN -->
+<!-- WIN SCREEN (2 BLOCKS: GALLERY + LETTER) -->
 <section id="win" class="screen hidden">
 <div class="panel center">
 <div class="hero">🎉</div>
 <div class="eyebrow">MISSION COMPLETE • AGE 20 UNLOCKED</div>
 <h1>HAPPY BIRTHDAY, MILOS ❤️</h1>
-<p><strong>ALL LEVELS CLEARED!</strong></p>
-<p>Blue: defeated.</p>
-<p>Trixx: safe.</p>
-<p>Birthday: successfully hacked.</p>
+<p><strong>BLUE IS DEFEATED & ALL REWARDS UNLOCKED!</strong></p>
 
-<div class="finalCard">
+<div class="winContainer">
+  <!-- BLOCK 1: 8 PICTURES -->
+  <div class="winBlock">
+    <h3>📸 MEMORY GALLERY</h3>
+    <p style="font-size:13px;color:#bbb">8 special moments collected along the journey:</p>
+    <div class="galleryGrid">
+      <div class="photoCard"><img src="https://picsum.photos/300/300?random=1" alt="Memory 1" onclick="viewPhoto(this.src)"></div>
+      <div class="photoCard"><img src="https://picsum.photos/300/300?random=2" alt="Memory 2" onclick="viewPhoto(this.src)"></div>
+      <div class="photoCard"><img src="https://picsum.photos/300/300?random=3" alt="Memory 3" onclick="viewPhoto(this.src)"></div>
+      <div class="photoCard"><img src="https://picsum.photos/300/300?random=4" alt="Memory 4" onclick="viewPhoto(this.src)"></div>
+      <div class="photoCard"><img src="https://picsum.photos/300/300?random=5" alt="Memory 5" onclick="viewPhoto(this.src)"></div>
+      <div class="photoCard"><img src="https://picsum.photos/300/300?random=6" alt="Memory 6" onclick="viewPhoto(this.src)"></div>
+      <div class="photoCard"><img src="https://picsum.photos/300/300?random=7" alt="Memory 7" onclick="viewPhoto(this.src)"></div>
+      <div class="photoCard"><img src="https://picsum.photos/300/300?random=8" alt="Memory 8" onclick="viewPhoto(this.src)"></div>
+    </div>
+  </div>
+
+  <!-- BLOCK 2: THE LETTER & PRESENT -->
+  <div class="winBlock">
+    <h3>💌 THE BIRTHDAY LETTER</h3>
+    <div class="finalCard">
 Hey Milos,
 
 Happy 20th birthday. ❤️
@@ -221,24 +235,25 @@ Happy birthday, Milos.
 I love you. ❤️
 
 — Rami
+    </div>
+
+    <div class="gift">
+      <div class="eyebrow">FINAL UNLOCK</div>
+      <div id="giftClosed">
+        <div class="giftIcon" onclick="openGift()">🎁</div>
+        <p style="margin:0;font-size:14px">Tap the present to open!</p>
+      </div>
+      <div id="giftOpen" class="hidden">
+        <div style="font-size:50px">💋</div>
+        <div class="reward">REWARD UNLOCKED</div>
+        <p>🎟️ One enormous real-life hug</p>
+        <p>💋 Unlimited kisses</p>
+        <p>🫂 All the cuddles waiting for you</p>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="gift">
-<div class="eyebrow">FINAL BIRTHDAY FILE</div>
-<h2>One last unlock...</h2>
-<div id="giftClosed">
-<div class="giftIcon" onclick="openGift()">🎁</div>
-<p>Tap the present.</p>
-</div>
-<div id="giftOpen" class="hidden">
-<div style="font-size:70px">💋</div>
-<div class="reward">REWARD UNLOCKED</div>
-<p>🎟️ One enormous real-life hug</p>
-<p>💋 Unlimited kisses</p>
-<p>🫂 All the cuddles waiting for you</p>
-<p><strong>Redeem when the distance finally loses.</strong></p>
-</div>
-</div>
 <br>
 <button class="secondary" onclick="location.reload()">Play Again ↻</button>
 </div>
@@ -260,11 +275,34 @@ let best=Number(localStorage.getItem("milosBirthdayBest")||0);
 
 document.getElementById("best").textContent=best;
 
-const player={
- x:145,y:360,w:42,h:58,vy:0,onGround:true
-};
-
+const player={x:145,y:360,w:42,h:58,vy:0,onGround:true};
 const keys={};
+
+/* Audio Control */
+const bgMusic = document.getElementById("bgMusic");
+let audioPlaying = false;
+
+function toggleAudio(){
+ if(!audioPlaying){
+  bgMusic.play().then(()=>{
+   audioPlaying=true;
+   document.getElementById("audioControl").textContent="🎵 Sound: ON";
+  }).catch(()=>{});
+ }else{
+  bgMusic.pause();
+  audioPlaying=false;
+  document.getElementById("audioControl").textContent="🎵 Sound: OFF";
+ }
+}
+
+function startMusic(){
+ if(!audioPlaying){
+  bgMusic.play().then(()=>{
+   audioPlaying=true;
+   document.getElementById("audioControl").textContent="🎵 Sound: ON";
+  }).catch(()=>{});
+ }
+}
 
 function section(id){
  document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));
@@ -273,6 +311,7 @@ function section(id){
 }
 
 function startGame(){
+ startMusic();
  section("gameScreen");
  running=true;paused=false;gameOver=false;
  last=performance.now();elapsed=0;score=0;starCount=0;lives=5;
@@ -357,8 +396,7 @@ function spawn(){
  objects.push({
   type,x:W+30,y,w:data.w,h:data.h,
   emoji:data.emoji,value:data.value,
-  bob:Math.random()*Math.PI*2,
-  passed:false
+  bob:Math.random()*Math.PI*2
  });
 }
 
@@ -572,6 +610,10 @@ function openGift(){
  confetti();
 }
 
+function viewPhoto(src){
+ window.open(src, '_blank');
+}
+
 for(let i=0;i<110;i++){
  const s=document.createElement("i");
  s.className="star";
@@ -592,42 +634,8 @@ function hitBoss(kind){
  document.getElementById("hpText").textContent=Math.max(0,hp);
  document.getElementById("bossResult").textContent=kind==="trixx"?"🧸 TRIXX ATTACK!":kind==="kiss"?"💋 CRITICAL HIT!":"❤️ HEART HIT!";
  if(hp<=0){
-  document.getElementById("bossResult").innerHTML="💥 BLUE HAS BEEN DEFEATED.<br><br><button onclick='section(\"maze\")'>CONTINUE TO BONUS LEVEL →</button>";
+  document.getElementById("bossResult").innerHTML="💥 BLUE HAS BEEN DEFEATED.<br><br><button onclick='section(\"win\");confetti()'>REVEAL BIRTHDAY SURPRISE 🎉 →</button>";
  }
-}
-
-/* --- MAZE LOGIC --- */
-function door(n){
- if(n===2){document.getElementById("doorResult").textContent="The Void contains nothing. Just like Blue's personality. 💀";return}
- if(n===0){document.getElementById("doorResult").textContent="Paris... wrong door. But romantic choice. 🇫🇷";return}
- document.getElementById("doorResult").innerHTML="🧸 TRIXX FOUND!<br><br><button onclick='section(\"quiz\");quiz()'>CONTINUE TO QUIZ LEVEL →</button>";
-}
-
-/* --- QUIZ LOGIC --- */
-const qs=[
- ["What is the birthday boy's name?",["Milos","Blue","Trixx"],0],
- ["Who is the enemy?",["Trixx","Blue","The cake"],1],
- ["Who is your teddy?",["Blue","Trixx","Batman"],1],
- ["How old is Milos now?",["19","20","100"],1]
-];
-let qi=0;
-function quiz(){qi=0;nextQ()}
-function nextQ(){
- if(qi>=qs.length){
-  section("win");
-  confetti();
-  return;
- }
- let q=qs[qi];
- document.getElementById("q").textContent=q[0];
- document.getElementById("answers").innerHTML=q[1].map((a,i)=>`<div class="choice" onclick="answer(${i})">${a}</div>`).join("");
- document.getElementById("quizResult").textContent="";
-}
-function answer(i){
- let q=qs[qi];
- document.getElementById("quizResult").textContent=i===q[2]?"✅ Correct! Trixx approves.":"❌ Wrong. Blue is laughing.";
- qi++;
- setTimeout(nextQ,600);
 }
 </script>
 </body>
