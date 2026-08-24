@@ -70,6 +70,11 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 .photoCard img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
 .photoCard:hover img{transform:scale(1.08)}
 
+/* Quiz Options */
+.quizOptions{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+.quizBtn{width:100%;padding:16px 20px;border-radius:16px;background:#ffffff12;border:1px solid #ffffff20;text-align:left;font-size:16px;cursor:pointer;transition:background .2s}
+.quizBtn:hover{background:#ffffff25}
+
 @media(max-width:850px){
 .rewardsGrid{grid-template-columns:1fr}
 .galleryGrid{grid-template-columns:repeat(4,1fr)}
@@ -178,6 +183,22 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 <div class="choice" onclick="hitBoss('kiss')">💋 EXTREME KISS</div>
 </div>
 <p id="bossResult" style="margin-top:20px;font-weight:bold;"></p>
+</div>
+</section>
+
+<!-- BIRTHDAY QUIZZ SCREEN -->
+<section id="quiz" class="screen hidden">
+<div class="panel center">
+<div class="hero">🧩</div>
+<div class="eyebrow">SECURITY CHECK • IDENTITY VERIFICATION</div>
+<h1>MILOS' BIRTHDAY QUIZ</h1>
+<p id="quizStepText">Question 1 of 3</p>
+<h2 id="quizQuestion" style="font-size:24px;margin:20px 0;">Who is turning 20 today?</h2>
+
+<div id="quizOptions" class="quizOptions">
+  <!-- Dynamic Options inserted here -->
+</div>
+<p id="quizFeedback" style="margin-top:15px;font-weight:bold;color:#ff9dc6;"></p>
 </div>
 </section>
 
@@ -662,8 +683,73 @@ function hitBoss(kind){
  document.getElementById("hpText").textContent=Math.max(0,hp);
  document.getElementById("bossResult").textContent=kind==="trixx"?"🧸 TRIXX ATTACK!":kind==="kiss"?"💋 CRITICAL HIT!":"❤️ HEART HIT!";
  if(hp<=0){
-  document.getElementById("bossResult").innerHTML="💥 BLUE HAS BEEN DEFEATED.<br><br><button onclick='section(\"win\");confetti()'>REVEAL BIRTHDAY CHESTS 🎉 →</button>";
+  document.getElementById("bossResult").innerHTML="💥 BLUE HAS BEEN DEFEATED.<br><br><button onclick='startQuiz()'>PROCEED TO SECURITY QUIZ 🧩 →</button>";
  }
+}
+
+/* --- QUIZ LOGIC --- */
+const quizData = [
+  {
+    q: "Who is turning 20 years old today? 🎂",
+    options: ["Milos ❤️", "Blue 💙", "Trixx 🧸", "Some random guy"],
+    answer: 0
+  },
+  {
+    q: "Who is the ultimate hero that defeated Blue?",
+    options: ["Rami", "Milos & Trixx 🧸", "A giant cake", "No one"],
+    answer: 1
+  },
+  {
+    q: "What is waiting inside the birthday blocks?",
+    options: ["Homework", "Nothing", "8 Photos, a Letter & a Special Gift 🎁", "More Blue attacks"],
+    answer: 2
+  }
+];
+
+let currentQuestion = 0;
+
+function startQuiz(){
+  currentQuestion = 0;
+  section("quiz");
+  loadQuizQuestion();
+}
+
+function loadQuizQuestion(){
+  const data = quizData[currentQuestion];
+  document.getElementById("quizStepText").textContent = `Question ${currentQuestion + 1} of ${quizData.length}`;
+  document.getElementById("quizQuestion").textContent = data.q;
+  document.getElementById("quizFeedback").textContent = "";
+  
+  const optionsBox = document.getElementById("quizOptions");
+  optionsBox.innerHTML = "";
+  
+  data.options.forEach((opt, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "quizBtn";
+    btn.textContent = `${idx + 1}. ${opt}`;
+    btn.onclick = () => checkAnswer(idx);
+    optionsBox.appendChild(btn);
+  });
+}
+
+function checkAnswer(chosenIdx){
+  const data = quizData[currentQuestion];
+  if(chosenIdx === data.answer){
+    document.getElementById("quizFeedback").style.color = "#8bff90";
+    document.getElementById("quizFeedback").textContent = "✨ Correct!";
+    setTimeout(() => {
+      currentQuestion++;
+      if(currentQuestion < quizData.length){
+        loadQuizQuestion();
+      } else {
+        section("win");
+        confetti();
+      }
+    }, 600);
+  } else {
+    document.getElementById("quizFeedback").style.color = "#ff7272";
+    document.getElementById("quizFeedback").textContent = "❌ Try again!";
+  }
 }
 </script>
 </body>
