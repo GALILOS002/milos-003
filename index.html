@@ -230,17 +230,87 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 <!-- CONTENT DISPLAY FOR BLOCK 1 (8 PICS) -->
 <div id="picsBlock" class="unlockedContent hidden">
   <h3 style="margin-top:0;font-size:22px;color:#ff9dc6;border-bottom:1px solid #ffffff15;padding-bottom:12px">📸 MEMORY GALLERY (8 PICS)</h3>
-  <div class="galleryGrid">
-    <img src="photo1.jpeg" alt="Memory 1" style="width: 200px; height: 200px; object-fit: cover; border-radius: 12px;">
-<img src="photo2.jpeg" alt="Memory 2" style="width: 200px; height: 200px; object-fit: cover; border-radius: 12px;">
-<img src="photo3.jpeg" alt="Memory 3" style="width: 200px; height: 200px; object-fit: cover; border-radius: 12px;">
-<img src="photo4.jpeg" alt="Memory 4" style="width: 200px; height: 200px; object-fit: cover; border-radius: 12px;">
-<img src="photo5.jpeg" alt="Memory 5" style="width: 200px; height: 200px; object-fit: cover; border-radius: 12px;">
-<img src="photo6.jpeg" alt="Memory 6" style="width: 200px; height: 200px; object-fit: cover; border-radius: 12px;">
-<img src="photo7.jpeg" alt="Memory 7" style="width: 200px; height: 200px; object-fit: cover; border-radius: 12px;">
-<img src="photo8.jpeg" alt="Memory 8" style="width: 200px; height: 200px; object-fit: cover; border-radius: 12px;">
-  </div>
+  <!-- 1. CSS STYLING (Put inside <head> or anywhere near the top of index.html) -->
+<style>
+.card-stack {
+  position: relative;
+  width: 300px;
+  height: 400px;
+  margin: 30px auto;
+  cursor: pointer;
+}
+
+.card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  border: 4px solid #ffffff;
+  opacity: 0;
+  transform: scale(0.95) translateY(10px);
+  transition: all 0.6s ease;
+  pointer-events: none;
+}
+
+/* Active photo */
+.card.active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+  z-index: 2;
+}
+
+/* Photo sliding out */
+.card.slide-out {
+  opacity: 0;
+  transform: translateX(-120%) rotate(-10deg);
+  z-index: 3;
+}
+</style>
+
+
+<!-- 2. HTML GALLERY (Replace your current 8 <img> tags with this) -->
+<div class="card-stack" onclick="nextCard()">
+  <img src="photo1.jpeg" alt="Memory 1" class="card active">
+  <img src="photo2.jpeg" alt="Memory 2" class="card">
+  <img src="photo3.jpeg" alt="Memory 3" class="card">
+  <img src="photo4.jpeg" alt="Memory 4" class="card">
+  <img src="photo5.jpeg" alt="Memory 5" class="card">
+  <img src="photo6.jpeg" alt="Memory 6" class="card">
+  <img src="photo7.jpeg" alt="Memory 7" class="card">
+  <img src="photo8.jpeg" alt="Memory 8" class="card">
 </div>
+<p style="text-align: center; color: #888; font-size: 14px;">(Click the photo to reveal the next memory ✨)</p>
+
+
+<!-- 3. JAVASCRIPT (Put before the closing </body> tag near the bottom of index.html) -->
+<script>
+let currentCardIndex = 0;
+
+function nextCard() {
+  const cards = document.querySelectorAll('.card-stack .card');
+  if (cards.length === 0) return;
+
+  const activeCard = cards[currentCardIndex];
+  
+  // Slide out current card
+  activeCard.classList.add('slide-out');
+  activeCard.classList.remove('active');
+
+  // Loop back to 0 after card 8
+  currentCardIndex = (currentCardIndex + 1) % cards.length;
+  const nextCardElement = cards[currentCardIndex];
+
+  setTimeout(() => {
+    activeCard.classList.remove('slide-out');
+    nextCardElement.classList.add('active');
+  }, 300);
+}
+</script>
 
 <!-- CONTENT DISPLAY FOR BLOCK 2 (LETTER & PRESENT) -->
 <div id="letterBlock" class="unlockedContent hidden">
